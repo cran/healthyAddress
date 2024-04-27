@@ -1103,10 +1103,12 @@ unsigned char number_suffix2raw(char x0, char x1) {
 
 
 
-SEXP C_uniquePostcodes(SEXP xx) {
+SEXP C_uniquePostcodes(SEXP xx, SEXP Strict, SEXP Retlen) {
   if (!isInteger(xx)) {
     error("`x` was type '%s' but must be integer.", type2char(TYPEOF(xx)));
   }
+  const bool strict = asLogical(Strict);
+  const bool retlen = asLogical(Retlen);
   R_xlen_t N = xlength(xx);
   const int * xp = INTEGER(xx);
 
@@ -1120,15 +1122,35 @@ SEXP C_uniquePostcodes(SEXP xx) {
   }
   int n_out = 0; // number of unique postcodes
   // i = 1, we don't want to include zero
-  for (int i = 1; i < SUP_POSTCODES; ++i) {
-    n_out += postcode_tbl[i];
+  if (strict) {
+    for (int i = 1; i < SUP_POSTCODES; ++i) {
+      if (is_postcode(i)) {
+        n_out += postcode_tbl[i];
+      }
+    }
+  } else {
+    for (int i = 1; i < SUP_POSTCODES; ++i) {
+      n_out += postcode_tbl[i];
+    }
+  }
+  if (retlen) {
+    return ScalarInteger(n_out);
   }
   SEXP ans = PROTECT(allocVector(INTSXP, n_out));
   int * restrict ansp = INTEGER(ans);
-  for (int i = 1, j = 0; i < SUP_POSTCODES; ++i) {
-    if (postcode_tbl[i]) {
-      ansp[j] = i;
-      ++j;
+  if (strict) {
+    for (int i = 1, j = 0; i < SUP_POSTCODES; ++i) {
+      if (postcode_tbl[i] && is_postcode(i)) {
+        ansp[j] = i;
+        ++j;
+      }
+    }
+  } else {
+    for (int i = 1, j = 0; i < SUP_POSTCODES; ++i) {
+      if (postcode_tbl[i]) {
+        ansp[j] = i;
+        ++j;
+      }
     }
   }
   UNPROTECT(1);
@@ -3882,6 +3904,10 @@ SEXP Cget_suffix(SEXP x) {
 SEXP C_trie_streetType(SEXP x) {
   errIfNotStr(x, "x");
   R_xlen_t N = xlength(x);
+  TrieNode * root = getNode();
+  if (root == NULL) {
+    return R_NilValue; // # nocov
+  }
 
   // The street types
   SEXP ans0 = PROTECT(allocVector(INTSXP, N));
@@ -3891,11 +3917,7 @@ SEXP C_trie_streetType(SEXP x) {
   SEXP ans1 = PROTECT(allocVector(INTSXP, N));
   int * restrict ansp1 = INTEGER(ans1);
 
-  TrieNode * root = getNode();
-  if (root == NULL) {
-    UNPROTECT(1); // # nocov
-    return R_NilValue; // # nocov
-  }
+
   for (int i = 0; i < NZ; ++i) {
     insert(root, ZTZ[i]->x, ZTZ[i]->cd);
   }
@@ -3983,7 +4005,7 @@ void freeALL_POSTCODE_STREETS(void) {
 void fillALL_POSTCODE_STREETS(SEXP Postcode, SEXP STREET_NAME, SEXP STREET_TYPE_CODE, SEXP Test) {
   R_xlen_t N = xlength(Postcode);
   const int test = asInteger(Test);
-  if (N > 500e3 || test < -1) {
+  if (N > 1000e3 || test < -1) {
     return; // # nocov
   }
   err_if_nchar_geq(STREET_NAME, (int)UINT8_MAX, "STREET_NAME");
@@ -4015,8 +4037,8 @@ void fillALL_POSTCODE_STREETS(SEXP Postcode, SEXP STREET_NAME, SEXP STREET_TYPE_
       continue;
     }
     // # nocov start
-    if (k > N_POSTCODES) {
-      warning("Internal error: k = %d > N_POSTCODES = %d.", k, N_POSTCODES);
+    if (k >= N_POSTCODES) {
+      warning("Internal error: k = %d > N_POSTCODES = %d. (i = %lld)", k, N_POSTCODES, (long long)i + 1);
       break;
     }
     // # nocov end
@@ -4070,19 +4092,7 @@ void fillALL_POSTCODE_STREETS(SEXP Postcode, SEXP STREET_NAME, SEXP STREET_TYPE_
     k++; // Move to the next PostcodeStreets structure
   }
 }
-
 // # nocov start
-SEXP C_fillPostcodeStreets(SEXP Postcode, SEXP STREET_NAME, SEXP STREET_TYPE_CODE, SEXP Test) {
-  fillALL_POSTCODE_STREETS(Postcode, STREET_NAME, STREET_TYPE_CODE, Test);
-  return R_NilValue;
-}
-
-SEXP C_freeALL_POSTCODE_STREETS(SEXP x) {
-  freeALL_POSTCODE_STREETS();
-  return R_NilValue;
-}
-// # nocov end
-
 TrieNode* postcodeTries[N_POSTCODES][N_STREET_TYPES] = {NULL};
 bool postcodeTriePopulated = false;
 
@@ -4090,7 +4100,7 @@ void populateTrieForPostcode(unsigned int opostcode, const char *streetName, uns
   // Check for valid postcode and street code
   if (opostcode >= SUP_POSTCODES || streetCode >= N_STREET_TYPES) {
     // Handle error or invalid input
-    return;
+    return; // # nocov
   }
   unsigned int postcode = postcode2intrnl(opostcode);
 
@@ -4099,7 +4109,7 @@ void populateTrieForPostcode(unsigned int opostcode, const char *streetName, uns
     postcodeTries[postcode][streetCode] = getNode();
     if (postcodeTries[postcode][streetCode] == NULL) {
       // Handle memory allocation failure
-      return;
+      return; // # nocov
     }
   }
 
@@ -4121,9 +4131,6 @@ void freePopTries(void) {
 }
 
 void populate_postcodeTries(void) {
-  if (postcodeTriePopulated) {
-    freePopTries(); // # nocov
-  }
   int k = 0; // the internal postcode
   for (int p = 800; p <= MAX_POSTCODE; ++p) {
     if (!is_postcode(p)) {
@@ -4146,9 +4153,8 @@ void populate_postcodeTries(void) {
       populateTrieForPostcode(p, P_k->street_names[i], P_k->street_code[i], i + 1);
     }
   }
-  postcodeTriePopulated = true;
 }
-
+// # nocov end
 
 int searchPostcodeTries(unsigned int postcode, unsigned int streetCode, const char * x, int nn) {
   if (postcodeTries[postcode][streetCode] == NULL) {
@@ -4188,6 +4194,21 @@ int searchPostcodeTries(unsigned int postcode, unsigned int streetCode, const ch
   return 0; // Indicate word not found
 }
 
+// # nocov start
+SEXP C_fillPostcodeStreets(SEXP Postcode, SEXP STREET_NAME, SEXP STREET_TYPE_CODE, SEXP Test) {
+  fillALL_POSTCODE_STREETS(Postcode, STREET_NAME, STREET_TYPE_CODE, Test);
+  prep_postcode2tinrnl();
+  populate_postcodeTries();
+  return R_NilValue;
+}
+
+SEXP C_freeALL_POSTCODE_STREETS(SEXP x) {
+  freePopTries();
+  freeALL_POSTCODE_STREETS();
+  return R_NilValue;
+}
+// # nocov end
+
 
 
 SEXP C_standard_address_postcode_trie(SEXP x) {
@@ -4201,15 +4222,16 @@ SEXP C_standard_address_postcode_trie(SEXP x) {
     error("(Internal error)ALL_POSTCODE_STREETS was NULL, aborting."); // # nocov
   }
 
+
   // This is an important efficiency step for converting postcodes to internl
   // Prepares a lookup table
-  prep_postcode2tinrnl();
+  // prep_postcode2tinrnl();
 
   // Prepare the trie that will be used to search street names
   // after identify the locations and types from C_trie_streetType
 
   // This is quite time-intensive (about 500ms)
-  populate_postcodeTries();
+  // populate_postcodeTries();
 
   SEXP StreetTypeTrie = PROTECT(C_trie_streetType(x));
   int * restrict stt = INTEGER(VECTOR_ELT(StreetTypeTrie, 0));
@@ -4315,7 +4337,6 @@ SEXP C_standard_address_postcode_trie(SEXP x) {
 
   }
 
-  freePopTries();
   SEXP ans = PROTECT(allocVector(VECSXP, 7));
   SET_VECTOR_ELT(ans, 0, StreetType);
   SET_VECTOR_ELT(ans, 1, StreetName);

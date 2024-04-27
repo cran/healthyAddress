@@ -14,9 +14,23 @@
 #include "streetcodes.h"
 #include <ctype.h>
 
+#if defined _OPENMP && _OPENMP >= 201511
+#define FORLOOP(content)                                                \
+int nThread = as_nThread(nthreads);                                     \
+_Pragma("omp parallel for num_threads(nThread)")                        \
+  for (R_xlen_t i = 0; i < N; ++i) {                                    \
+    content                                                             \
+  }
+#else
+#define FORLOOP(content)                                       \
+for (R_xlen_t i = 0; i < N; ++i) {                             \
+  content                                                      \
+}
+#endif
+
 
 // Empirical data / known features of Australian postcodes
-#define N_POSTCODES 2640
+#define N_POSTCODES 2642
 #define SUP_POSTCODES 8192
 #define SUP_POSTCODE_ 8191
 #define MAX_NUMBER_STREET_TYPES_ANY_POSTCODE 64
@@ -27,7 +41,7 @@
 
 // This is true, but not necessarily the longest
 // word one might find in an address string
-#define MAX_STREET_NAME_LEN 41
+#define MAX_STREET_NAME_LEN 42
 
 typedef struct {
   unsigned int THE_code : 2;
@@ -130,6 +144,7 @@ void verifyEquiStr4(SEXP x, const char * xx,
                     SEXP z, const char * zz,
                     SEXP w, const char * ww);
 void errifNotTF(SEXP x, const char * v);
+void verifyEquiDouble(SEXP x, const char * xx, SEXP y, const char * yy);
 
 // xnumbers
 int n_numbers(const char * x, int n);

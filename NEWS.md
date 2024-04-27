@@ -1,3 +1,18 @@
+# 0.4.0
+
+* New latlon support (#1):
+   - `download_latlon_data` downloades the latest geocoded addresses (in compressed form)
+   - `compress_latlon` provides compression to 32-bit integers of lat-lon coordinates while
+      retaining reasonably high precision.
+   - `mutate_latlon` takes a standardized address data.table and adds the lat-lon coordinates
+* Bug fix:
+   - UNPROTECT correctly positioned
+
+# 0.3.0
+
+* Updated to Nov 2023 data
+* `unique_Postcodes` gains a `strict` argument, to include only real postcodes
+
 # healthyAddress 0.0.4
 
 * Added a `NEWS.md` file to track changes to the package.

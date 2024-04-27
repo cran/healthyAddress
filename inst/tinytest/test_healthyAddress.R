@@ -55,6 +55,12 @@ expect_equal(ans$NUMBER_LAST, 5)
 
 # ans <- standardize_address("11 THE ESPLANADE Narre Warren South VIC 3805")
 # expect_equal(ans$STREET_NAME, "THE ESPLANADE")
+ans <- standardize_address("1 THE PINES AVENUE SYMONSTON ACT 2609")
+expect_equal(ans$NUMBER_FIRST, 1L)
+
+ans <- standardize_address(c("9 MONSOON RD DARWIN NT 0810",
+                             "19 CYCAD CIRCUIT DARWIN NT 0810"))
+expect_equal(ans$STREET_NAME, c("MONSOON", "CYCAD"))
 
 ans <- standardize_address(c("15 CANBERRA AVENUE FORREST ACT 2609",
                              "1 BEALE CRESCENT DEAKIN ACT 2600",
