@@ -1,4 +1,4 @@
-66f33965704173a367eea6c4aca7110a *DESCRIPTION
+4109a03f29482c4c4e2ba27b08067e28 *DESCRIPTION
 c0aad8a1e21b85baa7a67fef63bdf314 *NAMESPACE
 d2bbec3fa0968e61e1ccbcf30f70db69 *NEWS.md
 e4fa704e231ff74db1bd809d1d7cd530 *R/HashStreetName.R
@@ -95,7 +95,7 @@ db9eff31fbc6278a568a0a17226c4976 *src/C_max_nchar.c
 f5cef3e5f4ecbb9da9f02aa3fc5ceb5f *src/followed_by_ste_postcode.c
 c37e0ab8b3d01d762c065ef9aada64e9 *src/healthyAddress.h
 ad7f4011e361ceb91d5d26bf13c9fb4f *src/init.c
-51e39215be15164f34218ecafdcc5848 *src/latlon.c
+0a603143104257bca6e122dcfdab75ba *src/latlon.c
 1a6c55369d503787212266538e0a31f3 *src/multistate-postcodes.c
 dab48259fb97b9d89277e37f0a35c804 *src/omp_diagnose.c
 1394b77516b9d8e2daf6fa6cc960097b *src/postcode2intrnl.c
