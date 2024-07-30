@@ -1,6 +1,6 @@
 Package: healthyAddress
 Title: Convert Addresses to Standard Inputs
-Version: 0.4.2
+Version: 0.4.3
 Authors@R: 
     person(given = "Hugh",
            family = "Parsonage",
@@ -25,8 +25,8 @@ Imports: data.table, fastmatch, fst, hutils, hutilscpp, magrittr, qs,
 Suggests: tinytest
 Depends: R (>= 3.5.0)
 NeedsCompilation: yes
-Packaged: 2024-05-01 08:43:46 UTC; hughp
+Packaged: 2024-07-30 13:31:16 UTC; hughp
 Author: Hugh Parsonage [aut, cre]
 Maintainer: Hugh Parsonage <hugh.parsonage@gmail.com>
 Repository: CRAN
-Date/Publication: 2024-05-01 23:34:48 UTC
+Date/Publication: 2024-07-30 13:40:11 UTC
