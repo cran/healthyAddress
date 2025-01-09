@@ -875,7 +875,6 @@ SEXP Ctest_WordData(SEXP xx, SEXP rr) {
       return R_NilValue;
     }
 
-    int k = 0;
     for (R_xlen_t i = 0; i < N; ++i) {
       A[i] = 0;
       B[i] = 0;
@@ -888,7 +887,6 @@ SEXP Ctest_WordData(SEXP xx, SEXP rr) {
           }
         }
       } else {
-        ++k;
         for (uint64_t j = 1; j < 64; ++j) {
           if (xi[j - 1] == ' ' && isUPPER(xi[j])) {
             A[i] |= ((uint64_t)1 << j);
@@ -1516,7 +1514,7 @@ SEXP CFindSentence(SEXP xx, SEXP W1, SEXP W2) {
 
 bool noLC(SEXP x, int nThread) {
   R_xlen_t N = xlength(x);
-  bool char_array[256] = {0};
+  unsigned int char_array[256] = {0};
   const SEXP * xp = STRING_PTR_RO(x);
 #pragma omp parallel for num_threads(nThread) reduction(|| : char_array[:256])
   for (R_xlen_t i = 0; i < N; ++i) {
@@ -4093,7 +4091,7 @@ void fillALL_POSTCODE_STREETS(SEXP Postcode, SEXP STREET_NAME, SEXP STREET_TYPE_
   }
 }
 // # nocov start
-TrieNode* postcodeTries[N_POSTCODES][N_STREET_TYPES] = {NULL};
+TrieNode* postcodeTries[N_POSTCODES][N_STREET_TYPES] = {{NULL}};
 bool postcodeTriePopulated = false;
 
 void populateTrieForPostcode(unsigned int opostcode, const char *streetName, unsigned int streetCode, int ii) {

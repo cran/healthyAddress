@@ -1,6 +1,6 @@
-0fc10c51a0477bee9788cd9099957487 *DESCRIPTION
+826e39c990bec17f22503e79babf8df1 *DESCRIPTION
 c0aad8a1e21b85baa7a67fef63bdf314 *NAMESPACE
-41687a26efd774a5eaa07c15df028959 *NEWS.md
+7b1175195f548b537ddb0fc5d94727f0 *NEWS.md
 e4fa704e231ff74db1bd809d1d7cd530 *R/HashStreetName.R
 b48213b30e05234b423f21c805ba8625 *R/NumberSuffix2raw.R
 6cba858f06c7578772074fa67e46bd6f *R/anyComma.R
@@ -89,7 +89,7 @@ ef280c78604891a6c645bc4cab15ff7e *man/unique_Postcodes.Rd
 7c478d510797f6d8f5ca97071091af5d *src/C_max_nchar.c
 76c32d4e4ac9dcda727adbb5464cd723 *src/Cconcat_upper.c
 95e3011e37d9dde0d75f3a3819b2acd3 *src/Makevars
-373c59e453731ef39a4451f7ab268e68 *src/StandardAddress.c
+d7c667a459b53690c149dbf78c155520 *src/StandardAddress.c
 85754e13afab3cf0eef350b39438fce0 *src/character.c
 580df84d763c8777f2471d8510f64965 *src/constants.c
 7c01772c49e6d73451e7ee25c7bd01dc *src/followed_by_ste_postcode.c
